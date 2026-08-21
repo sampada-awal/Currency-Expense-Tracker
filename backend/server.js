@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const PORT = 5000;
+const expensesRouter = require('./routes/expenses');
+app.use('/expenses', expensesRouter);
 
 app.use(cors());
 // basic route for the homepage
