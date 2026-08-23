@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const { expenses } = require('../store');
+const crypto = require('crypto');
+const { ALLOWED_CURRENCIES } = require('../currencies');
 
 //routes go here using router.get, router.post, etc.
 router.get('/', (req, res) => {
@@ -12,16 +15,21 @@ router.post('/', (req, res) => {
 
   const errors = [];
 
-  // check title: is it a non-empty string after trimming?
-  // if invalid, errors.push('some message')
+  if (typeof title !== 'string' || title.trim() === ''){
+    errors.push('Title is required and must be a non-empty string');
+  }
 
-  // check amount: is it a number, and > 0?
+  if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
+  errors.push('Amount is required and must be a positive number');
+}
 
-  // check currency: is it in ALLOWED_CURRENCIES? (decide case-sensitivity here)
+  if (typeof currency !== 'string' || !ALLOWED_CURRENCIES.includes(currency.toUpperCase())) {
+    errors.push('Currency is required and must be one of the allowed currencies');
+  }
 
-  // check date: if provided, does `new Date(date)` produce a valid date?
-  //   hint: an invalid date's .getTime() returns NaN — Number.isNaN(someDate.getTime())
-  //         is how you detect that
+  if (date && (typeof date !== 'string' || Number.isNaN(new Date(date).getTime()))) {
+    errors.push('Date is required and must be a valid date string');
+  }
 
   if (errors.length > 0) {
     return res.status(400).json({ error: 'Validation failed', details: errors });
