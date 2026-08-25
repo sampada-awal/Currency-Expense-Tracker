@@ -10,7 +10,7 @@ function App() {
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('USD');
 
-  const [homeCurrency, setHomeCurrency] = useState('USD');
+  const [homeCurrency, setHomeCurrency] = useState('NPR');
   const [converted, setConverted] = useState({}); // { expenseId: convertedAmount }
   const [convertLoading, setConvertLoading] = useState(false);
   const [convertError, setConvertError] = useState(null);
@@ -21,6 +21,30 @@ function App() {
   .then(res => res.json())
   .then(data => setExpenses(data));
   }, []);
+
+  //2.Whenever `expenses` or `homeCurrency` changes, re-run conversions.
+   useEffect(() => {
+    async function convertAll() {
+    setConvertLoading(true);
+    setConvertError(null);
+    try {
+      const results = {};
+      for (const expense of expenses) {
+      const res = await fetch(`${API_BASE}/convert?from=${expense.currency}&to=${homeCurrency}&amount=${expense.amount}`);
+      const data = await res.json();
+      results[expense.id] = data.result;
+    }
+    setConverted(results);
+   } catch (err) {
+    setConvertError('Could not convert some expenses.');
+  } finally {
+    setConvertLoading(false);
+  }
+  }
+  convertAll();
+  }, [expenses, homeCurrency]);
+
+
 
 
 }
