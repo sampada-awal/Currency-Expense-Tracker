@@ -58,7 +58,8 @@ function App() {
     .then(res => res.json().then(data => ({ ok: res.ok, data })))
     .then(({ ok, data }) => {
       if (!ok) {
-        setFormError(data.error || 'Failed to add expense');
+        const message = data.details ? data.details.join(', ') : (data.error || 'Failed to add expense');
+        setFormError(message);
         return;
       }
       setExpenses([...expenses, data]);
