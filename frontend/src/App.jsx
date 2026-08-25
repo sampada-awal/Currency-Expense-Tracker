@@ -46,6 +46,7 @@ function App() {
  
   // 3. handle form submission
   function handleSubmit(e) {
+    e.preventDefault();
     fetch(`${API_BASE}/expenses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -63,8 +64,62 @@ function App() {
   function handleDelete(id) { 
     fetch(`${API_BASE}/expenses/${id}`, { method: 'DELETE' })
    .then(() => setExpenses(expenses.filter(e => e.id !== id)));
- }
+  }
 
+  const total = expenses.reduce((sum, e) => sum + (converted[e.id] ?? 0), 0);
+   return (
+    <div className="app">
+      <h1>Currency & Expense Snapshot</h1>
+
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+        <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+          {CURRENCIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+        <button type="submit">Add Expense</button>
+      </form>
+
+      <div className="home-currency">
+        <label>Home currency: </label>
+        <select value={homeCurrency} onChange={(e) => setHomeCurrency(e.target.value)}>
+          {CURRENCIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+
+      {convertLoading && <p>Converting…</p>}
+      {convertError && <p className="error">{convertError}</p>}
+
+      <ul>
+        {expenses.map((expense) => (
+          <li key={expense.id}>
+            {expense.title} — {expense.amount} {expense.currency}
+            {' → '}
+            {converted[expense.id] !== undefined
+              ? `${converted[expense.id].toFixed(2)} ${homeCurrency}`
+              : '…'}
+            <button onClick={() => handleDelete(expense.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+
+      <h2>Total: {total.toFixed(2)} {homeCurrency}</h2>
+    </div>
+  );
 
 
 
