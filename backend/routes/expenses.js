@@ -20,8 +20,7 @@ router.post('/', (req, res) => {
   }
 
   if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
-  errors.push('Amount is required and must be a positive number');
-}
+  errors.push('Amount is required and must be a positive number');}
 
   if (typeof currency !== 'string' || !ALLOWED_CURRENCIES.includes(currency.toUpperCase())) {
     errors.push('Currency is required and must be one of the allowed currencies');
@@ -39,7 +38,7 @@ router.post('/', (req, res) => {
     id: crypto.randomUUID(),
     title: title.trim(),
     amount,
-    currency,       // apply whatever normalization you decided on
+    currency,       
     date: date ? new Date(date).toISOString() : new Date().toISOString(),
   };
 
@@ -50,10 +49,13 @@ router.post('/', (req, res) => {
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
 
-  // find the index of the expense with this id in the array
-  // if not found (index === -1), respond 404 with a message
+  const index = expenses.findIndex((expenses) => expenses.id === id);
 
-  // otherwise, remove it from the array (look up Array.prototype.splice)
-  // and send back the removed item
+  if (index === -1) {
+    return res.status(404).json({errror: 'Expense not found'});
+  }
+
+  const [deleted] = expenses.splice(index,1);
+  res.json(deleted);
 });
 module.exports = router;
