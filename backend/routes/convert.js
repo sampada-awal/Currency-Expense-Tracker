@@ -1,0 +1,48 @@
+const express = require('express');
+const router = express.Router();
+const { ALLOWED_CURRENCIES } = require('../currencies');
+
+router.get('/', async (req, res) => {
+  const { from, to, amount } = req.query;
+
+  if (!from || !to || !amount){
+    return res.status(400).json({ error: 'Missing required query parameters: from, to, amount' });
+  }
+
+  const fromUpper = from.toUpperCase();
+  const toUpper = to.toUpperCase();
+
+  if (!ALLOWED_CURRENCIES.includes(fromUpper)) {
+    return res.status(400).json({ error: 'Invalid "from" currency' });
+  }
+
+  if (!ALLOWED_CURRENCIES.includes(toUpper)) {
+    return res.status(400).json({ error: 'Invalid "to" currency' });
+  }
+
+  if (isNaN(amount) || Number(amount) < 0) {
+    return res.status(400).json({ error: 'Invalid "amount". It must be a non-negative number' });
+  }
+
+  if (fromUpper === toUpper) {
+    return res.json({ from: fromUpper, to: toUpper, amount: Number(amount), result: Number(amount) });
+  }
+
+  try {
+    const url = `https://api.frankfurter.dev/v2/rate/${fromUpper}/${toUpper}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Bad response from exchange rate API');
+    }
+
+    const data = await response.json();
+    const result = Number(amount) * data.rate;
+
+    res.json({ from: fromUpper, to: toUpper, amount: Number(amount), result });
+  } catch (err) {
+    res.status(503).json({ error: 'Exchange rate service unavailable, try again later' });
+  }
+});
+
+module.exports = router;
