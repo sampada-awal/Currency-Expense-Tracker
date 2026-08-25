@@ -14,6 +14,7 @@ function App() {
   const [converted, setConverted] = useState({}); // { expenseId: convertedAmount }
   const [convertLoading, setConvertLoading] = useState(false);
   const [convertError, setConvertError] = useState(null);
+  const [formError, setFormError] = useState(null);
 
   //1. on page load it fetches all expenses from the backend and stores them in state
   useEffect(() => {
@@ -46,19 +47,28 @@ function App() {
  
   // 3. handle form submission
   function handleSubmit(e) {
-    e.preventDefault();
-    fetch(`${API_BASE}/expenses`, {
+  e.preventDefault();
+  setFormError(null);
+
+  fetch(`${API_BASE}/expenses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title, amount: Number(amount), currency }),
+  })
+    .then(res => res.json().then(data => ({ ok: res.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) {
+        setFormError(data.error || 'Failed to add expense');
+        return;
+      }
+      setExpenses([...expenses, data]);
+      setTitle('');
+      setAmount('');
     })
-    .then(res => res.json())
-    .then(newExpense => {
-    setExpenses([...expenses, newExpense]);
-    setTitle('');
-    setAmount('');
-   });
-  }
+    .catch(() => {
+      setFormError('Could not reach the server. Is it running?');
+    });
+}
 
   // 4. Handle deleting an expense by id. 
   function handleDelete(id) { 
@@ -72,6 +82,7 @@ function App() {
       <h1>Currency & Expense Snapshot</h1>
 
       <form onSubmit={handleSubmit}>
+        
         <input
           type="text"
           placeholder="Title"
@@ -91,6 +102,8 @@ function App() {
         </select>
         <button type="submit">Add Expense</button>
       </form>
+      
+      {formError && <p className="error">{formError}</p>}
 
       <div className="home-currency">
         <label>Home currency: </label>
