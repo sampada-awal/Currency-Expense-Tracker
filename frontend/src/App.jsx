@@ -80,7 +80,7 @@ function App() {
   const total = expenses.reduce((sum, e) => sum + (converted[e.id] ?? 0), 0);
    return (
     <div className="app">
-      <h1>Currency & Expense Snapshot</h1>
+      <h1>Expense Tracker</h1>
 
       <form onSubmit={handleSubmit}>
         
