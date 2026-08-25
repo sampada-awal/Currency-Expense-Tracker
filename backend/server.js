@@ -3,19 +3,22 @@ const cors = require('cors');
 const app = express();
 const PORT = 5000;
 const expensesRouter = require('./routes/expenses');
-app.use('/expenses', expensesRouter);
+const convertRouter = require('./routes/convert');
 
 app.use(cors());
-// basic route for the homepage
+app.use(express.json());
+
+app.use('/expenses', expensesRouter);
+app.use('/convert', convertRouter);
+
 app.get('/', (req, res)=>{
     res.send('Welcome to the Currency Expense Tracker API');
 });
 
-//start listening for network req
-app.listen(PORT, ()=>{
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
-
 app.get('/health', (req, res) =>{
     res.json({Status: "ok"});
+});
+
+app.listen(PORT, ()=>{
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
