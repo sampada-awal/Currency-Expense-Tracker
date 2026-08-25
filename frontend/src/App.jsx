@@ -43,6 +43,27 @@ function App() {
   }
   convertAll();
   }, [expenses, homeCurrency]);
+ 
+  // 3. handle form submission
+  function handleSubmit(e) {
+    fetch(`${API_BASE}/expenses`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, amount: Number(amount), currency }),
+    })
+    .then(res => res.json())
+    .then(newExpense => {
+    setExpenses([...expenses, newExpense]);
+    setTitle('');
+    setAmount('');
+   });
+  }
+
+  // 4. Handle deleting an expense by id. 
+  function handleDelete(id) { 
+    fetch(`${API_BASE}/expenses/${id}`, { method: 'DELETE' })
+   .then(() => setExpenses(expenses.filter(e => e.id !== id)));
+ }
 
 
 
