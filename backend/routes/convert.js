@@ -30,7 +30,10 @@ router.get('/', async (req, res) => {
 
   try {
     const url = `https://api.frankfurter.dev/v2/rate/${fromUpper}/${toUpper}`;
-    const response = await fetch(url);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error('Bad response from exchange rate API');
