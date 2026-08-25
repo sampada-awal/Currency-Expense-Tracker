@@ -38,7 +38,7 @@ router.post('/', (req, res) => {
     id: crypto.randomUUID(),
     title: title.trim(),
     amount,
-    currency,       
+    currency: currency.toUpperCase(),       
     date: date ? new Date(date).toISOString() : new Date().toISOString(),
   };
 
@@ -49,10 +49,10 @@ router.post('/', (req, res) => {
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
 
-  const index = expenses.findIndex((expenses) => expenses.id === id);
+  const index = expenses.findIndex((expense) => expense.id === id);
 
   if (index === -1) {
-    return res.status(404).json({errror: 'Expense not found'});
+    return res.status(404).json({error: 'Expense not found'});
   }
 
   const [deleted] = expenses.splice(index,1);
