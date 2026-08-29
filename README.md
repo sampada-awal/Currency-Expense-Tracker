@@ -51,6 +51,7 @@ Since NPR is one of this app's supported currencies, v2 is used.
 - Supported currencies are fixed to `USD`, `EUR`, `GBP`, `NPR`, `INR` (see `backend/currencies.js`).
 - An expense's `amount` must be a number greater than 0; zero and negative amounts are rejected by the backend.
 - Expenses are stored in memory only, so all data is lost when the backend restarts.
+- The backend caches the last successful exchange rate for each currency pair in memory and reuses it if the live API is unavailable.
 - The frontend is hardcoded to call `http://localhost:5000`, so the backend must be running locally while developing.
 - Currency conversion is limited to the currencies in `backend/currencies.js`.
 - More time would go into persistent storage, environment-based configuration, better error handling, and automated tests.

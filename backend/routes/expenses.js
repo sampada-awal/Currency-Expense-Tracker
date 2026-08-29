@@ -5,11 +5,13 @@ const crypto = require('crypto');
 const { ALLOWED_CURRENCIES } = require('../currencies');
 
 //routes go here using router.get, router.post, etc.
+//returns all expenses sorted from new to old
 router.get('/', (req, res) => {
   const sorted = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
   res.json(sorted);
 });
 
+//add new expense with validation
 router.post('/', (req, res) => {
   const { title, amount, currency, date } = req.body;
 

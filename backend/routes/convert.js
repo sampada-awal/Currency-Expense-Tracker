@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { ALLOWED_CURRENCIES } = require('../currencies');
+const { exchangeRateCache } = require('../store');
 
 router.get('/', async (req, res) => {
   const { from, to, amount } = req.query;
@@ -42,8 +43,17 @@ router.get('/', async (req, res) => {
     const data = await response.json();
     const result = Number(amount) * data.rate;
 
-    res.json({ from: fromUpper, to: toUpper, amount: Number(amount), result });
+    exchangeRateCache.set(`${fromUpper}:${toUpper}`, data.rate);
+
+    res.json({ from: fromUpper, to: toUpper, amount: Number(amount), result, source: 'live' });
   } catch (err) {
+    const cachedRate = exchangeRateCache.get(`${fromUpper}:${toUpper}`);
+
+    if (cachedRate !== undefined) {
+      const result = Number(amount) * cachedRate;
+      return res.json({ from: fromUpper, to: toUpper, amount: Number(amount), result, source: 'cache' });
+    }
+
     res.status(503).json({ error: 'Exchange rate service unavailable, try again later' });
   }
 });
