@@ -55,25 +55,26 @@ function App() {
     try {
       const results = {};
       for (const expense of expenses) {
-        const res = await fetch(`${API_BASE}/convert?from=${expense.currency}&to=${homeCurrency}&amount=${expense.amount}`);
+        try {
+          const res = await fetch(`${API_BASE}/convert?from=${expense.currency}&to=${homeCurrency}&amount=${expense.amount}`);
 
-        if (!res.ok) {
-          throw new Error('Conversion failed');
+          if (!res.ok) {
+            throw new Error('Conversion failed');
+          }
+
+          const data = await res.json();
+
+          if (typeof data.result !== 'number') {
+            throw new Error('Invalid conversion result');
+          }
+
+          results[expense.id] = data.result;
+        } catch (error) {
+          setConvertError('Could not convert some expenses. Please try again.');
         }
-
-        const data = await res.json();
-
-        if (typeof data.result !== 'number') {
-          throw new Error('Invalid conversion result');
-        }
-
-        results[expense.id] = data.result;
       }
 
-      setConverted(results);
-    } catch (err) {
-      setConverted({});
-      setConvertError('Could not convert some expenses. Please try again.');
+      setConverted((currentConverted) => ({ ...currentConverted, ...results }));
     } finally {
       setConvertLoading(false);
     }
